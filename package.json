@@ -1,8 +1,11 @@
 {
   "name": "fzearch",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "a easy to use fuzzy searcher",
-  "git repository": "https://github.com/momingse/fzsearch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/momingse/fzsearch"
+  },
   "license": "MIT",
   "scripts": {
     "build": "tsup",
