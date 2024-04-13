@@ -34,7 +34,7 @@ const result = Fzeach.search(list, keyword, 'damerau-levenshtein');
 
 ## API
 
-### `fzsearch.search(query: string, maxResults?: number, customFunc?: SWCustomFunc): string[]`
+### `fzearch.search(query: string, maxResults?: number, customFunc?: SWCustomFunc): string[]`
 
 - `query`: The keyword to search.
 - `db`: The list of strings to search.

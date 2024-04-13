@@ -4,7 +4,7 @@
   "description": "a easy to use fuzzy searcher",
   "repository": {
     "type": "git",
-    "url": "https://github.com/momingse/fzsearch"
+    "url": "https://github.com/momingse/fzearch"
   },
   "license": "MIT",
   "scripts": {
