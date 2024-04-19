@@ -20,3 +20,27 @@ export const deepCopy = <T>(
 
   return result;
 };
+
+export const flattenInLevel = (obj: any): string[][] => {
+  let level = -1;
+  const queue = [obj];
+  const result: string[][] = [];
+  while (queue.length) {
+    const tempQueue = [];
+    for (const item of queue) {
+      if (typeof item === "string") {
+        result[level] = result[level] || [];
+        result[level].push(item);
+      } else if (Object.prototype.toString.call(item) === "[object Object]") {
+        for (const key in item) {
+          tempQueue.push(item[key]);
+        }
+      }
+    }
+    queue.length = 0;
+    queue.push(...tempQueue);
+    level++;
+  }
+
+  return result;
+};

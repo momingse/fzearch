@@ -3,8 +3,9 @@ import {
   GetPenalty,
   GetSimilarity,
   SearchOptions,
+  Searchable,
 } from "../type";
-import { deepCopy } from "./helper";
+import { deepCopy, flattenInLevel } from "./helper";
 import swSearch from "./swSearch";
 
 export default class Fzearch {
@@ -30,16 +31,55 @@ export default class Fzearch {
 
   static search(
     query: string,
-    db: string[],
+    db: Searchable[],
     options: FzearchOptions = {},
   ): any[] {
     const _options = this.getSearchOptions(options);
-    const result = db.map((item) => {
-      return {
-        item,
-        score: swSearch(item, query, _options),
-      };
-    });
+    const clonedDB = deepCopy(db);
+
+    const isObject =
+      Object.prototype.toString.call(db[0]) === "[object Object]";
+    const isString =
+      Object.prototype.toString.call(db[0]) === "[object String]";
+
+    if (!isObject && !isString) {
+      throw new Error("The db must be an array of strings or objects");
+    }
+
+    let result: {
+      item: Searchable;
+      score: number;
+    }[] = [];
+
+    // If the db is an array of objects
+    if (isObject) {
+      const levelPenalty = options.levelPenalty || 1;
+      const flattenDB = clonedDB.map((item) => flattenInLevel(item));
+      result = flattenDB.map((flattenItem, index) => {
+        const score = flattenItem.reduce(
+          (acc, itemInLevel, level) =>
+            acc +
+            itemInLevel.reduce(
+              (acc, item) => acc + swSearch(item, query, _options),
+              0,
+            ) *
+              Math.pow(levelPenalty, level),
+          0,
+        );
+        return {
+          item: db[index],
+          score,
+        };
+      });
+    } else if (isString) {
+      // If the db is an array of strings
+      result = (db as string[]).map((item) => {
+        return {
+          item,
+          score: swSearch(item, query, _options),
+        };
+      });
+    }
 
     if (options.showScore) {
       return result

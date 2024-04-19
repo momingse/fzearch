@@ -6,9 +6,12 @@ export type FzearchOptions = {
   maxResults?: number;
   keys?: string[];
   caseSensitive?: boolean;
+  levelPenalty?: number;
 } & Partial<SearchOptions>;
 
 export type SearchOptions = {
   getPenalty: GetPenalty;
   getSimilarity: GetSimilarity;
 };
+
+export type Searchable = string | Record<string, any>;
