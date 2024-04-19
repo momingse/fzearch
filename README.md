@@ -34,14 +34,16 @@ const result = Fzeach.search(list, keyword, 'damerau-levenshtein');
 
 ## API
 
-### `fzearch.search(query: string, maxResults?: number, customFunc?: SWCustomFunc): string[]`
+### `Fzearch.search(query: string, db: string[], options?: FzearchOptions): any[]`
 
 - `query`: The keyword to search.
 - `db`: The list of strings to search.
-- `maxResults`: The maximum number of results to return. Default is 5.
-- `customFunc`: The custom functions to calculate the scores and penalties.
-  - `getPenalty`: The function to calculate the penalty for the given characters.
-  - `getScore`: The function to calculate the score for the given characters.
+- `options`: The options for the search.
+    - `maxResults`: The maximum number of results to return. Default is 5.
+    - `getPenalty`: The function to calculate the penalty for the given characters.
+    - `getScore`: The function to calculate the score for the given characters.
+    - `showScore`: Whether to show the score in the result. Default is false.
+    - `caseSensitive`: Whether to consider the case sensitivity. Default is false.
 
 ## Algorithms
 
