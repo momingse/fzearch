@@ -265,4 +265,90 @@ describe("Search with static function", () => {
       ).toEqual("REACT");
     });
   });
+
+  describe("Testing with Object", () => {
+    describe("Testing with simple object with one levet", () => {
+      const db = [
+        { name: "John Doe", age: 20 },
+        { name: "Jane Doe", age: 25 },
+        { name: "John Smith", age: 30 },
+        { name: "Jane Smith", age: 35 },
+      ];
+
+      const search: { query: string; firstResult: object }[] = [
+        {
+          query: "John",
+          firstResult: { name: "John Doe", age: 20 },
+        },
+        {
+          query: "Jane",
+          firstResult: { name: "Jane Doe", age: 25 },
+        },
+        {
+          query: "Smith",
+          firstResult: { name: "John Smith", age: 30 },
+        },
+        {
+          query: "Jane Smith",
+          firstResult: { name: "Jane Smith", age: 35 },
+        },
+      ];
+
+      search.forEach(({ query, firstResult }) => {
+        it(`should return ${firstResult.toString()} as the first result when searching for ${query}`, () => {
+          expect(Fzearch.search(query, db)[0]).toEqual(firstResult);
+        });
+      });
+    });
+
+    describe("Testing with nested object", () => {
+      const db = [
+        {
+          name: "John Doe",
+          age: 20,
+          address: { city: "New York", son: "Anson" },
+        },
+        {
+          name: "Jane Doe",
+          age: 25,
+          address: { city: "Los Angeles", son: "John" },
+        },
+        {
+          name: "John Smith",
+          age: 30,
+          address: { city: "Chicago", son: "Smith" },
+        },
+        {
+          name: "Jane Smith",
+          age: 35,
+          address: { city: "San Francisco", son: "Jane" },
+        },
+      ];
+    
+      const search: { query: string; firstResult: object }[] = [
+        {
+          query: "Anson",
+          firstResult: { name: "John Doe", age: 20, address: { city: "New York", son: "Anson" } },
+        },
+        {
+          query: "Jane",
+          firstResult: { name: "Jane Smith", age: 35, address: { city: "San Francisco", son: "Jane" } },
+        },
+        {
+          query: "Smith",
+          firstResult: { name: "John Smith", age: 30, address: { city: "Chicago", son: "Smith" } },
+        },
+        {
+          query: "Jane Smith",
+          firstResult: { name: "Jane Smith", age: 35, address: { city: "San Francisco", son: "Jane" } },
+        },
+      ];
+
+      search.forEach(({ query, firstResult }) => {
+        it(`should return ${firstResult.toString()} as the first result when searching for ${query}`, () => {
+          expect(Fzearch.search(query, db)[0]).toEqual(firstResult);
+        });
+      });
+    });
+  });
 });
