@@ -35,6 +35,8 @@ export const flattenInLevel = (obj: any): string[][] => {
         for (const key in item) {
           tempQueue.push(item[key]);
         }
+      } else if (Array.isArray(item)) {
+        tempQueue.push(...item);
       }
     }
     queue.length = 0;

@@ -254,6 +254,64 @@ describe("Search with class instance", () => {
           expect(fzearch.search(query)[0]).toEqual(firstResult);
         });
       });
+
+      describe("Testing with obj with array", () => {
+        let fzearch: Fzearch;
+
+        const db = [
+          {
+            name: "xxx",
+            age: 20,
+            address: { city: "New York", son: ["Anson", "John"] },
+          },
+          {
+            name: "xxx",
+            age: 25,
+            address: { city: "Los Angeles", son: ["John", "Jane"] },
+          },
+          {
+            name: "xxx",
+            age: 30,
+            address: { city: "Chicago", son: ["Smith", "John"] },
+          },
+          {
+            name: "xxx",
+            age: 35,
+            address: { city: "San Francisco", son: ["Jane", "Smith"] },
+          },
+        ];
+
+        const search: { query: string; firstResult: object }[] = [
+          {
+            query: "Anson",
+            firstResult: db[0],
+          },
+          {
+            query: "Jane",
+            firstResult: db[1],
+          },
+          {
+            query: "Smith",
+            firstResult: db[2],
+          },
+          {
+            query: "Jane Smith",
+            firstResult: db[3],
+          },
+        ];
+
+        beforeEach(() => {
+          fzearch = new Fzearch(db, { keys: ["address.son"] });
+        });
+
+        search.forEach(({ query, firstResult }) => {
+          it(`should return ${JSON.stringify(
+            firstResult,
+          )} as the first result when searching for ${query}`, () => {
+            expect(fzearch.search(query)[0]).toEqual(firstResult);
+          });
+        });
+      });
     });
 
     describe("Test Fzearch db function", () => {
@@ -722,6 +780,59 @@ describe("Search with static function", () => {
             Fzearch.search(query, db, {
               keys: ["address.city", "address.son"],
             })[0],
+          ).toEqual(firstResult);
+        });
+      });
+    });
+    describe("Testing with obj with array", () => {
+      const db = [
+        {
+          name: "xxx",
+          age: 20,
+          address: { city: "New York", son: ["Anson", "John"] },
+        },
+        {
+          name: "xxx",
+          age: 25,
+          address: { city: "Los Angeles", son: ["John", "Jane"] },
+        },
+        {
+          name: "xxx",
+          age: 30,
+          address: { city: "Chicago", son: ["Smith", "John"] },
+        },
+        {
+          name: "xxx",
+          age: 35,
+          address: { city: "San Francisco", son: ["Jane", "Smith"] },
+        },
+      ];
+
+      const search: { query: string; firstResult: object }[] = [
+        {
+          query: "Anson",
+          firstResult: db[0],
+        },
+        {
+          query: "Jane",
+          firstResult: db[1],
+        },
+        {
+          query: "Smith",
+          firstResult: db[2],
+        },
+        {
+          query: "Jane Smith",
+          firstResult: db[3],
+        },
+      ];
+
+      search.forEach(({ query, firstResult }) => {
+        it(`should return ${JSON.stringify(
+          firstResult,
+        )} as the first result when searching for ${query}`, () => {
+          expect(
+            Fzearch.search(query, db, { keys: ["address.son"] })[0],
           ).toEqual(firstResult);
         });
       });
