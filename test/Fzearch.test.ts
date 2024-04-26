@@ -106,7 +106,7 @@ describe("Search with class instance", () => {
   describe("Testing maxResults", () => {
     let fzearch: Fzearch;
 
-    const db = ["algorithm", "searching", "agents", "debounce", "throttle"];
+    const db = ["searching agent", "earching agents", "searching agents"];
     const query = "searching agents";
 
     beforeEach(() => {
@@ -286,7 +286,7 @@ describe("Search with class instance", () => {
           it("should set db as an array of object", () => {
             expect(fzearch.search("Jane Doe")).toEqual([]);
             fzearch.setDB(db);
-            expect(fzearch.search("Jane Doe")).toEqual(db.reverse());
+            expect(fzearch.search("Jane Doe")[0]).toEqual(db[1]);
           });
         });
 
@@ -300,7 +300,7 @@ describe("Search with class instance", () => {
           it("should set db as an array of string", () => {
             expect(fzearch.search("Jane Doe")).toEqual([]);
             fzearch.setDB(db);
-            expect(fzearch.search("Jane Doe")).toEqual(db.reverse());
+            expect(fzearch.search("Jane Doe")[0]).toEqual(db[1]);
           });
         });
       });
@@ -426,6 +426,26 @@ describe("Search with class instance", () => {
       });
     });
   });
+  describe("Test with drop out threshold", () => {
+    let fzearch: Fzearch;
+
+    const db = ["searching agent", "earching agents", "searching agents"];
+    const query = "searching agents";
+
+    it("should return 3 results", () => {
+      fzearch = new Fzearch(db, {
+        dropoutRate: 0.1,
+      });
+      expect(fzearch.search(query).length).toEqual(3);
+    });
+
+    it("should return 1 results", () => {
+      fzearch = new Fzearch(db, {
+        dropoutRate: 1,
+      });
+      expect(fzearch.search(query).length).toEqual(1);
+    });
+  });
 });
 
 describe("Search with static function", () => {
@@ -516,7 +536,7 @@ describe("Search with static function", () => {
   });
 
   describe("Testing maxResults", () => {
-    const db = ["algorithm", "searching", "agents", "debounce", "throttle"];
+    const db = ["searching agent", "earching agents", "searching agents"];
     const query = "searching agents";
 
     it("should return 2 results", () => {
@@ -726,6 +746,27 @@ describe("Search with static function", () => {
 
     it("should return the correct result", () => {
       expect(Fzearch.search(query, db, { keys: ["name"] })[0]).toEqual(db[3]);
+    });
+  });
+
+  describe("Test with drop out threshold", () => {
+    const db = ["searching agent", "earching agents", "searching agents"];
+    const query = "searching agents";
+
+    it("should return 3 results", () => {
+      expect(
+        Fzearch.search(query, db, {
+          dropoutRate: 0.1,
+        }).length,
+      ).toEqual(3);
+    });
+
+    it("should return 1 results", () => {
+      expect(
+        Fzearch.search(query, db, {
+          dropoutRate: 1,
+        }).length,
+      ).toEqual(1);
     });
   });
 });
