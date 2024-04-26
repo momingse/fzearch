@@ -1,6 +1,6 @@
 {
   "name": "fzearch",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "a easy to use fuzzy searcher",
   "repository": {
     "type": "git",
@@ -9,7 +9,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsup",
-    "test": "jest"
+    "test": "jest",
+    "release": "npx standard-version"
   },
   "keywords": [
     "fuzzy",
