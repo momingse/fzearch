@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.2.2](https://github.com/momingse/fzearch/compare/v1.2.0...v1.2.2) (2024-04-26)
+
+
+### Bug Fixes
+
+* bug fix on array in obj ([7728ff7](https://github.com/momingse/fzearch/commit/7728ff700b740108913032dacf8c258d3fc2383e))
+
 ## [1.2.0](https://github.com/momingse/fzearch/compare/v1.1.4...v1.2.0) (2024-04-26)
 
 
