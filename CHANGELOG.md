@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/momingse/fzearch/compare/v1.1.4...v1.2.0) (2024-04-26)
+
+
+### Features
+
+* add dropout rate ([6b88fea](https://github.com/momingse/fzearch/commit/6b88fea69b1f4301911cae84cd5bf6a182475dec))
+
 ### [1.1.4](https://github.com/momingse/fzearch/compare/v1.1.2...v1.1.4) (2024-04-26)
 
 
