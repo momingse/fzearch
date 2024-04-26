@@ -1,6 +1,6 @@
 {
   "name": "fzearch",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "a easy to use fuzzy searcher",
   "repository": {
     "type": "git",
