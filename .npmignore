@@ -8,3 +8,6 @@ jest.config.js
 
 tsup.config.ts
 yarn.lock
+
+CHANGELOG.md
+/src
