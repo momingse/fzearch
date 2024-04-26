@@ -24,14 +24,13 @@ export default class Fzearch {
     options: FzearchOptions = {},
   ): any[] {
     const _options = this.getSearchOptions(options);
-    const clonedDB = deepCopy(db);
     const maxResults = options.maxResults || 10;
     const showScore = options.showScore || false;
     const keys = options.keys;
     const levelPenalty = options.levelPenalty || 1;
     const searchOptions = Fzearch.getSearchOptions(options);
 
-    const flattenDB = clonedDB.map((item) => {
+    const flattenDB = db.map((item) => {
       const isObject =
         Object.prototype.toString.call(item) === "[object Object]";
       const isString =
@@ -41,7 +40,7 @@ export default class Fzearch {
       }
       const keys = options.keys;
       if (!keys) {
-        const _item = isString ? {item} : item;
+        const _item = isString ? { item } : item;
         return flattenInLevel(_item);
       }
 
@@ -49,7 +48,10 @@ export default class Fzearch {
       keys.forEach((key) => {
         const value = getValueByKey(item, key.split("."));
         if (value) {
-          const _value = Object.prototype.toString.call(value) === "[object String]" ? {value} : value;
+          const _value =
+            Object.prototype.toString.call(value) === "[object String]"
+              ? { value }
+              : value;
           result = mergeFlattenArray(result, flattenInLevel(_value));
         }
       });
@@ -69,19 +71,24 @@ export default class Fzearch {
         0,
       );
       return {
-        item: clonedDB[index],
+        index,
         score,
       };
     });
 
     if (options.showScore) {
-      return results.sort((a, b) => a.score - b.score).slice(0, maxResults);
+      return results
+        .sort((a, b) => a.score - b.score)
+        .slice(0, maxResults)
+        .map((result) => {
+          return { item: db[result.index], score: result.score };
+        });
     }
 
     return results
       .sort((a, b) => a.score - b.score)
-      .map((result) => result.item)
-      .slice(0, maxResults);
+      .slice(0, maxResults)
+      .map((result) => db[result.index]);
   }
 
   static getSearchOptions(options: FzearchOptions): SearchOptions {
@@ -128,15 +135,15 @@ export default class Fzearch {
     };
   }
 
-  constructor(db: Searchable[] = [], options?: FzearchOptions) {
+  constructor(db: Searchable[] = [], options: FzearchOptions = {}) {
+    this.options = deepCopy(options);
     this.setDB(db);
-    this.options = deepCopy(options || {});
   }
 
   public setDB(db: Searchable[] | Searchable): void {
     const isArray = Array.isArray(db);
     if (!isArray) {
-      db = [deepCopy(db)] as Searchable[];
+      db = [db] as Searchable[];
     }
 
     this.db = [];
@@ -149,7 +156,7 @@ export default class Fzearch {
   public addDB(db: Searchable[] | Searchable): void {
     const isArray = Array.isArray(db);
     if (!isArray) {
-      db = [deepCopy(db)] as Searchable[];
+      db = [db] as Searchable[];
     }
 
     (db as Searchable[]).forEach((item) => {
@@ -183,7 +190,11 @@ export default class Fzearch {
     keys.forEach((key) => {
       const value = getValueByKey(item, key.split("."));
       if (value) {
-        result = mergeFlattenArray(result, flattenInLevel(value));
+        const _value =
+          Object.prototype.toString.call(value) === "[object String]"
+            ? { value }
+            : value;
+        result = mergeFlattenArray(result, flattenInLevel(_value));
       }
     });
 
@@ -195,6 +206,7 @@ export default class Fzearch {
   }
 
   public search(query: string): any[] {
+    console.log(this.flattenDB[0]);
     const options = Fzearch.getSearchOptions(this.options);
 
     const levelPenalty = this.options.levelPenalty || 1;
@@ -210,7 +222,7 @@ export default class Fzearch {
         0,
       );
       return {
-        item: this.db[index],
+        index,
         score,
       };
     });
@@ -218,12 +230,14 @@ export default class Fzearch {
     if (this.options.showScore) {
       return results
         .sort((a, b) => a.score - b.score)
-        .slice(0, this.options.maxResults);
+        .map((result) => {
+          return { item: this.db[result.index], score: result.score };
+        });
     }
 
     return results
       .sort((a, b) => a.score - b.score)
-      .map((result) => result.item)
-      .slice(0, this.options.maxResults);
+      .slice(0, this.options.maxResults)
+      .map((result) => this.db[result.index]);
   }
 }

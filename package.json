@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsup",
-    "test": "jest",
+    "test": "jest --verbose",
     "release": "npx standard-version"
   },
   "keywords": [
