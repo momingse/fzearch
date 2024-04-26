@@ -44,6 +44,8 @@ const result = Fzeach.search(list, keyword, 'damerau-levenshtein');
     - `getScore`: The function to calculate the score for the given characters.
     - `showScore`: Whether to show the score in the result. Default is false.
     - `caseSensitive`: Whether to consider the case sensitivity. Default is false.
+    - `levelPenalty`: The penalty for the level of the keyword in the object. Default is 1 (which is mean no penalty).
+    - `dropoutRate`: The threshold for the dropout. Default is 0.8 (higher means less dropout).
 
 ## Algorithms
 

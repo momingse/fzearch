@@ -28,6 +28,7 @@ export default class Fzearch {
     const showScore = options.showScore || false;
     const keys = options.keys;
     const levelPenalty = options.levelPenalty || 1;
+    const dropoutRate = options.dropoutRate || 0.8;
     const searchOptions = Fzearch.getSearchOptions(options);
 
     const flattenDB = db.map((item) => {
@@ -59,6 +60,7 @@ export default class Fzearch {
       return result;
     });
 
+    let minScore = 0;
     const results = flattenDB.map((flattenItem, index) => {
       const score = flattenItem.reduce(
         (acc, itemInLevel, level) =>
@@ -70,14 +72,20 @@ export default class Fzearch {
             Math.pow(levelPenalty, level),
         0,
       );
+
+      minScore = Math.min(minScore, score);
+
       return {
         index,
         score,
       };
     });
 
+    const threshold = minScore * dropoutRate;
+
     if (options.showScore) {
       return results
+        .filter((result) => result.score <= threshold)
         .sort((a, b) => a.score - b.score)
         .slice(0, maxResults)
         .map((result) => {
@@ -86,6 +94,7 @@ export default class Fzearch {
     }
 
     return results
+      .filter((result) => result.score <= threshold)
       .sort((a, b) => a.score - b.score)
       .slice(0, maxResults)
       .map((result) => db[result.index]);
@@ -206,10 +215,12 @@ export default class Fzearch {
   }
 
   public search(query: string): any[] {
-    console.log(this.flattenDB[0]);
     const options = Fzearch.getSearchOptions(this.options);
 
     const levelPenalty = this.options.levelPenalty || 1;
+    const dropoutRate = this.options.dropoutRate || 0.8;
+
+    let minScore = 0;
     const results = this.flattenDB.map((flattenItem, index) => {
       const score = flattenItem.reduce(
         (acc, itemInLevel, level) =>
@@ -221,14 +232,20 @@ export default class Fzearch {
             Math.pow(levelPenalty, level),
         0,
       );
+
+      minScore = Math.min(minScore, score);
+
       return {
         index,
         score,
       };
     });
 
+    const threshold = minScore * dropoutRate;
+
     if (this.options.showScore) {
       return results
+        .filter((result) => result.score <= threshold)
         .sort((a, b) => a.score - b.score)
         .map((result) => {
           return { item: this.db[result.index], score: result.score };
@@ -236,6 +253,7 @@ export default class Fzearch {
     }
 
     return results
+      .filter((result) => result.score <= threshold)
       .sort((a, b) => a.score - b.score)
       .slice(0, this.options.maxResults)
       .map((result) => this.db[result.index]);

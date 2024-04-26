@@ -7,6 +7,7 @@ export type FzearchOptions = {
   keys?: string[];
   caseSensitive?: boolean;
   levelPenalty?: number;
+  dropoutRate?: number;
 } & Partial<SearchOptions>;
 
 export type SearchOptions = {
