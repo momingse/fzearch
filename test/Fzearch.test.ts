@@ -142,6 +142,7 @@ describe("Search with class instance", () => {
       expect(fzearch.search("REACT")[0]).toEqual("REACT");
     });
   });
+
   describe("Testing with Object", () => {
     let fzearch: Fzearch;
 
@@ -252,6 +253,176 @@ describe("Search with class instance", () => {
         it(`should return ${firstResult.toString()} as the first result when searching for ${query}`, () => {
           expect(fzearch.search(query)[0]).toEqual(firstResult);
         });
+      });
+    });
+
+    describe("Test Fzearch db function", () => {
+      let fzearch: Fzearch;
+
+      describe("Test setDB", () => {
+        describe("Test setDB with object", () => {
+          const db = { name: "John Doe", age: 20 };
+
+          beforeEach(() => {
+            fzearch = new Fzearch([]);
+          });
+
+          it("should set db as an array of object", () => {
+            expect(fzearch.search("Jane Doe")).toEqual([]);
+            fzearch.setDB(db);
+            expect(fzearch.search("John Doe")[0]).toEqual(db);
+          });
+        });
+        describe("Test setDB with array of object", () => {
+          const db = [
+            { name: "John Doe", age: 20 },
+            { name: "Jane Doe", age: 25 },
+          ];
+
+          beforeEach(() => {
+            fzearch = new Fzearch([]);
+          });
+
+          it("should set db as an array of object", () => {
+            expect(fzearch.search("Jane Doe")).toEqual([]);
+            fzearch.setDB(db);
+            expect(fzearch.search("Jane Doe")).toEqual(db.reverse());
+          });
+        });
+
+        describe("Test setDB with array of string", () => {
+          const db = ["John Doe", "Jane Doe"];
+
+          beforeEach(() => {
+            fzearch = new Fzearch([]);
+          });
+
+          it("should set db as an array of string", () => {
+            expect(fzearch.search("Jane Doe")).toEqual([]);
+            fzearch.setDB(db);
+            expect(fzearch.search("Jane Doe")).toEqual(db.reverse());
+          });
+        });
+      });
+
+      describe("Test addDB", () => {
+        describe("Test addDB with empty db adding object", () => {
+          const db = { name: "John Doe", age: 20 };
+
+          beforeEach(() => {
+            fzearch = new Fzearch([]);
+          });
+
+          it("should set db as an array of object", () => {
+            expect(fzearch.search("Jane Doe")).toEqual([]);
+            fzearch.addDB(db);
+            expect(fzearch.search("John Doe")[0]).toEqual(db);
+            // check if deep copy
+            expect(fzearch.search("John Doe")[0]).not.toBe(db);
+          });
+        });
+
+        describe("Test addDB with empty db adding string", () => {
+          const db = "John Doe";
+
+          beforeEach(() => {
+            fzearch = new Fzearch([]);
+          });
+
+          it("should set db as an array of string", () => {
+            expect(fzearch.search("Jane Doe")).toEqual([]);
+            fzearch.addDB(db);
+            expect(fzearch.search("John Doe")[0]).toEqual(db);
+          });
+        });
+
+        describe("Test addDB with string db adding object", () => {
+          const db = { name: "John Doe", age: 20 };
+
+          beforeEach(() => {
+            fzearch = new Fzearch(["Jane Doe"]);
+          });
+
+          it("should set db as an array of object", () => {
+            expect(fzearch.search("John Doe")[0]).toEqual("Jane Doe");
+            fzearch.addDB(db);
+            expect(fzearch.search("John Doe")[0]).toEqual(db);
+          });
+        });
+
+        describe("Test addDB with object db adding string", () => {
+          const db = "John Doe";
+
+          beforeEach(() => {
+            fzearch = new Fzearch([{ name: "Jane Doe", age: 25 }]);
+          });
+
+          it("should set db as an array of string", () => {
+            expect(fzearch.search("John Doe")[0]).toEqual({
+              name: "Jane Doe",
+              age: 25,
+            });
+            fzearch.addDB(db);
+            expect(fzearch.search("John Doe")[0]).toEqual(db);
+          });
+        });
+
+        describe("Test addDB with object db adding object", () => {
+          const db = { name: "John Doe", age: 20 };
+
+          beforeEach(() => {
+            fzearch = new Fzearch([{ name: "Jane Doe", age: 25 }]);
+          });
+
+          it("should set db as an array of object", () => {
+            expect(fzearch.search("John Doe")[0]).toEqual({
+              name: "Jane Doe",
+              age: 25,
+            });
+            fzearch.addDB(db);
+            expect(fzearch.search("John Doe")[0]).toEqual(db);
+          });
+        });
+
+        describe("Test addDB with string db adding string", () => {
+          const db = "John Doe";
+
+          beforeEach(() => {
+            fzearch = new Fzearch(["Jane Doe"]);
+          });
+
+          it("should set db as an array of string", () => {
+            expect(fzearch.search("John Doe")[0]).toEqual("Jane Doe");
+            fzearch.addDB(db);
+            expect(fzearch.search("John Doe")[0]).toEqual(db);
+          });
+        });
+      });
+    });
+
+    describe("Test with large data", () => {
+      let fzearch: Fzearch;
+      // create a list of obj which each obj contains 3 keys one key is name for searching other keys is random string length 1000
+      const db = Array.from({ length: 1000 }, (_, i) => ({
+        name: `name${i}`,
+        key1: Array.from(
+          { length: 1000 },
+          () => Math.random().toString(36)[2],
+        ).join(""),
+        key2: Array.from(
+          { length: 1000 },
+          () => Math.random().toString(36)[2],
+        ).join(""),
+      }));
+
+      const query = "name3";
+
+      beforeEach(() => {
+        fzearch = new Fzearch(db, { keys: ["name"] });
+      });
+
+      it("should return the correct result", () => {
+        expect(fzearch.search(query)[0]).toEqual(db[3]);
       });
     });
   });
@@ -524,7 +695,9 @@ describe("Search with static function", () => {
       ];
 
       search.forEach(({ query, firstResult }) => {
-        it(`should return ${JSON.stringify(firstResult)} as the first result when searching for ${query}`, () => {
+        it(`should return ${JSON.stringify(
+          firstResult,
+        )} as the first result when searching for ${query}`, () => {
           expect(
             Fzearch.search(query, db, {
               keys: ["address.city", "address.son"],
@@ -535,147 +708,24 @@ describe("Search with static function", () => {
     });
   });
 
-  describe("Test Fzearch db function", () => {
-    let fzearch: Fzearch;
+  describe("Test with large data", () => {
+    // create a list of obj which each obj contains 3 keys one key is name for searching other keys is random string length 1000
+    const db = Array.from({ length: 1000 }, (_, i) => ({
+      name: `name${i}`,
+      key1: Array.from(
+        { length: 1000 },
+        () => Math.random().toString(36)[2],
+      ).join(""),
+      key2: Array.from(
+        { length: 1000 },
+        () => Math.random().toString(36)[2],
+      ).join(""),
+    }));
 
-    describe("Test setDB", () => {
-      describe("Test setDB with object", () => {
-        const db = { name: "John Doe", age: 20 };
+    const query = "name3";
 
-        beforeEach(() => {
-          fzearch = new Fzearch([]);
-        });
-
-        it("should set db as an array of object", () => {
-          expect(fzearch.search("Jane Doe")).toEqual([]);
-          fzearch.setDB(db);
-          expect(fzearch.search("John Doe")[0]).toEqual(db);
-        });
-      });
-      describe("Test setDB with array of object", () => {
-        const db = [
-          { name: "John Doe", age: 20 },
-          { name: "Jane Doe", age: 25 },
-        ];
-
-        beforeEach(() => {
-          fzearch = new Fzearch([]);
-        });
-
-        it("should set db as an array of object", () => {
-          expect(fzearch.search("Jane Doe")).toEqual([]);
-          fzearch.setDB(db);
-          expect(fzearch.search("Jane Doe")).toEqual(db.reverse());
-        });
-      });
-
-      describe("Test setDB with array of string", () => {
-        const db = ["John Doe", "Jane Doe"];
-
-        beforeEach(() => {
-          fzearch = new Fzearch([]);
-        });
-
-        it("should set db as an array of string", () => {
-          expect(fzearch.search("Jane Doe")).toEqual([]);
-          fzearch.setDB(db);
-          expect(fzearch.search("Jane Doe")).toEqual(db.reverse());
-        });
-      });
-    });
-
-    describe("Test addDB", () => {
-      describe("Test addDB with empty db adding object", () => {
-        const db = { name: "John Doe", age: 20 };
-
-        beforeEach(() => {
-          fzearch = new Fzearch([]);
-        });
-
-        it("should set db as an array of object", () => {
-          expect(fzearch.search("Jane Doe")).toEqual([]);
-          fzearch.addDB(db);
-          expect(fzearch.search("John Doe")[0]).toEqual(db);
-          // check if deep copy
-          expect(fzearch.search("John Doe")[0]).not.toBe(db);
-        });
-      });
-
-      describe("Test addDB with empty db adding string", () => {
-        const db = "John Doe";
-
-        beforeEach(() => {
-          fzearch = new Fzearch([]);
-        });
-
-        it("should set db as an array of string", () => {
-          expect(fzearch.search("Jane Doe")).toEqual([]);
-          fzearch.addDB(db);
-          expect(fzearch.search("John Doe")[0]).toEqual(db);
-        });
-      });
-
-      describe("Test addDB with string db adding object", () => {
-        const db = { name: "John Doe", age: 20 };
-
-        beforeEach(() => {
-          fzearch = new Fzearch(["Jane Doe"]);
-        });
-
-        it("should set db as an array of object", () => {
-          expect(fzearch.search("John Doe")[0]).toEqual("Jane Doe");
-          fzearch.addDB(db);
-          expect(fzearch.search("John Doe")[0]).toEqual(db);
-        });
-      });
-
-      describe("Test addDB with object db adding string", () => {
-        const db = "John Doe";
-
-        beforeEach(() => {
-          fzearch = new Fzearch([{ name: "Jane Doe", age: 25 }]);
-        });
-
-        it("should set db as an array of string", () => {
-          expect(fzearch.search("John Doe")[0]).toEqual({
-            name: "Jane Doe",
-            age: 25,
-          });
-          fzearch.addDB(db);
-          expect(fzearch.search("John Doe")[0]).toEqual(db);
-        });
-      });
-
-      describe("Test addDB with object db adding object", () => {
-        const db = { name: "John Doe", age: 20 };
-
-        beforeEach(() => {
-          fzearch = new Fzearch([{ name: "Jane Doe", age: 25 }]);
-        });
-
-        it("should set db as an array of object", () => {
-          expect(fzearch.search("John Doe")[0]).toEqual({
-            name: "Jane Doe",
-            age: 25,
-          });
-          fzearch.addDB(db);
-          expect(fzearch.search("John Doe")[0]).toEqual(db);
-        });
-      });
-
-      describe("Test addDB with string db adding string", () => {
-        const db = "John Doe";
-
-        beforeEach(() => {
-          fzearch = new Fzearch(["Jane Doe"]);
-        });
-
-        it("should set db as an array of string", () => {
-          expect(fzearch.search("John Doe")[0]).toEqual("Jane Doe");
-          fzearch.addDB(db);
-          expect(fzearch.search("John Doe")[0]).toEqual(db);
-        });
-      });
+    it("should return the correct result", () => {
+      expect(Fzearch.search(query, db, { keys: ["name"] })[0]).toEqual(db[3]);
     });
   });
 });
