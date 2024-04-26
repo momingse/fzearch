@@ -1,4 +1,4 @@
-import { deepCopy, flattenInLevel } from "../src/core/helper";
+import { deepCopy, flattenInLevel, mergeFlattenArray } from "../src/core/helper";
 
 describe("Helper", () => {
   describe("This test if deepCopy function works with cloning options in Fzearch", () => {
@@ -51,6 +51,15 @@ describe("Helper", () => {
       };
       const result = [["a"], ["c", "h"], ["e"], ["g"]];
       expect(flattenInLevel(obj)).toEqual(result);
-    })
+    });
+  });
+
+  describe("This test if mergeNestedArray function works", () => {
+    it("should merge two nested array", () => {
+      const arr1 = [["a"], ["c", "h"], ["e"], ["g"]];
+      const arr2 = [["b"], ["d", "i"], ["f"], ["j"]];
+      const result = [["a", "b"], ["c", "h", "d", "i"], ["e", "f"], ["g", "j"]];
+      expect(mergeFlattenArray(arr1, arr2)).toEqual(result);
+    });
   });
 });

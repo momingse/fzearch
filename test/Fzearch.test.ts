@@ -479,6 +479,60 @@ describe("Search with static function", () => {
         });
       });
     });
+
+    describe("Testing with custom keys", () => {
+      const db = [
+        {
+          name: "John Doe",
+          age: 20,
+          address: { city: "New York", son: "Anson" },
+        },
+        {
+          name: "Jane Doe",
+          age: 25,
+          address: { city: "Los Angeles", son: "John" },
+        },
+        {
+          name: "John Smith",
+          age: 30,
+          address: { city: "Chicago", son: "Smith" },
+        },
+        {
+          name: "Anson Smith",
+          age: 35,
+          address: { city: "San Francisco", son: "Jane" },
+        },
+      ];
+
+      const search: { query: string; firstResult: object }[] = [
+        {
+          query: "Anson",
+          firstResult: db[0],
+        },
+        {
+          query: "Jane",
+          firstResult: db[3],
+        },
+        {
+          query: "Smith",
+          firstResult: db[2],
+        },
+        {
+          query: "San",
+          firstResult: db[3],
+        },
+      ];
+
+      search.forEach(({ query, firstResult }) => {
+        it(`should return ${JSON.stringify(firstResult)} as the first result when searching for ${query}`, () => {
+          expect(
+            Fzearch.search(query, db, {
+              keys: ["address.city", "address.son"],
+            })[0],
+          ).toEqual(firstResult);
+        });
+      });
+    });
   });
 
   describe("Test Fzearch db function", () => {
