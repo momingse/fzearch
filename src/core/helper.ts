@@ -44,3 +44,23 @@ export const flattenInLevel = (obj: any): string[][] => {
 
   return result;
 };
+
+export const mergeFlattenArray = (arr1: string[][], arr2: string[][]): string[][] => {
+  const result: string[][] = [];
+  for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+    result[i] = (arr1[i] || []).concat(arr2[i] || []);
+  }
+  return result;
+}
+
+export const getValueByKey = (obj: any, key: string[]): any => {
+  let result = obj;
+  for (const k of key) {
+    if (result && result[k]) {
+      result = result[k];
+    } else {
+      return null;
+    }
+  }
+  return result;
+};

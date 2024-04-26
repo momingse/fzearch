@@ -5,7 +5,12 @@ import {
   SearchOptions,
   Searchable,
 } from "../type";
-import { deepCopy, flattenInLevel } from "./helper";
+import {
+  deepCopy,
+  flattenInLevel,
+  getValueByKey,
+  mergeFlattenArray,
+} from "./helper";
 import swSearch from "./swSearch";
 
 export default class Fzearch {
@@ -20,61 +25,63 @@ export default class Fzearch {
   ): any[] {
     const _options = this.getSearchOptions(options);
     const clonedDB = deepCopy(db);
+    const maxResults = options.maxResults || 10;
+    const showScore = options.showScore || false;
+    const keys = options.keys;
+    const levelPenalty = options.levelPenalty || 1;
+    const searchOptions = Fzearch.getSearchOptions(options);
 
-    const isObject =
-      Object.prototype.toString.call(db[0]) === "[object Object]";
-    const isString =
-      Object.prototype.toString.call(db[0]) === "[object String]";
+    const flattenDB = clonedDB.map((item) => {
+      const isObject =
+        Object.prototype.toString.call(item) === "[object Object]";
+      const isString =
+        Object.prototype.toString.call(item) === "[object String]";
+      if (!isObject && !isString) {
+        throw new Error("The db must be an array of strings or objects");
+      }
+      const keys = options.keys;
+      if (!keys) {
+        const _item = isString ? {item} : item;
+        return flattenInLevel(_item);
+      }
 
-    if (!isObject && !isString) {
-      throw new Error("The db must be an array of strings or objects");
-    }
-
-    let result: {
-      item: Searchable;
-      score: number;
-    }[] = [];
-
-    // If the db is an array of objects
-    if (isObject) {
-      const levelPenalty = options.levelPenalty || 1;
-      const flattenDB = clonedDB.map((item) => flattenInLevel(item));
-      result = flattenDB.map((flattenItem, index) => {
-        const score = flattenItem.reduce(
-          (acc, itemInLevel, level) =>
-            acc +
-            itemInLevel.reduce(
-              (acc, item) => acc + swSearch(item, query, _options),
-              0,
-            ) *
-              Math.pow(levelPenalty, level),
-          0,
-        );
-        return {
-          item: db[index],
-          score,
-        };
+      let result: string[][] = [];
+      keys.forEach((key) => {
+        const value = getValueByKey(item, key.split("."));
+        if (value) {
+          const _value = Object.prototype.toString.call(value) === "[object String]" ? {value} : value;
+          result = mergeFlattenArray(result, flattenInLevel(_value));
+        }
       });
-    } else if (isString) {
-      // If the db is an array of strings
-      result = (db as string[]).map((item) => {
-        return {
-          item,
-          score: swSearch(item, query, _options),
-        };
-      });
-    }
+
+      return result;
+    });
+
+    const results = flattenDB.map((flattenItem, index) => {
+      const score = flattenItem.reduce(
+        (acc, itemInLevel, level) =>
+          acc +
+          itemInLevel.reduce(
+            (acc, item) => acc + swSearch(item, query, searchOptions),
+            0,
+          ) *
+            Math.pow(levelPenalty, level),
+        0,
+      );
+      return {
+        item: clonedDB[index],
+        score,
+      };
+    });
 
     if (options.showScore) {
-      return result
-        .sort((a, b) => a.score - b.score)
-        .slice(0, options.maxResults);
+      return results.sort((a, b) => a.score - b.score).slice(0, maxResults);
     }
 
-    return result
+    return results
       .sort((a, b) => a.score - b.score)
       .map((result) => result.item)
-      .slice(0, options.maxResults);
+      .slice(0, maxResults);
   }
 
   static getSearchOptions(options: FzearchOptions): SearchOptions {
@@ -159,7 +166,28 @@ export default class Fzearch {
     }
 
     this.db.push(deepCopy(item));
-    this.flattenDB.push(isObject ? flattenInLevel(item) : [[item as string]]);
+    this.flattenDB.push(this.getFlattenItem(item, isObject));
+  }
+
+  private getFlattenItem(item: Searchable, isObject: boolean): string[][] {
+    if (!isObject) {
+      return [[item as string]];
+    }
+
+    if (!this.options?.keys) {
+      return flattenInLevel(item);
+    }
+
+    const keys = this.options.keys;
+    let result: string[][] = [];
+    keys.forEach((key) => {
+      const value = getValueByKey(item, key.split("."));
+      if (value) {
+        result = mergeFlattenArray(result, flattenInLevel(value));
+      }
+    });
+
+    return result;
   }
 
   public setMaxResults(maxResults: number): void {
